@@ -28,7 +28,7 @@ object UserTagsCIP {
     togetherDS.select(tbOrderDS("user_id"), orderDS("pro_code"), tbOrderDS("actual_amount"))
       .filter(row => !row.isNullAt(0) && !row.isNullAt(1) && !row.isNullAt(2))
       .map(row => (row.getLong(0).toString, (row.getDouble(2),1)))
-      .rdd.reduceByKey((x,y) => (x._1+x._1, y._2+x._2))
+      .rdd.reduceByKey((x,y) => (x._1+y._1, y._2+x._2))
       .map(each => Amount(each._1,
         each._1,  each._2._1.toInt/each._2._2.toInt))
       .saveToEs("usertags/usertags")

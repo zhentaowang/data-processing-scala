@@ -23,11 +23,12 @@ object CIP {
     togetherDS.select(tbOrderDS("user_id"), orderDS("pro_code"), tbOrderDS("actual_amount"))
       .filter(row => !row.isNullAt(0) && !row.isNullAt(1) && !row.isNullAt(2))
       .map(row => ((row.getLong(0).toString, row.getString(1)), (row.getDouble(2),1)))
-      .rdd.reduceByKey((x,y) => (x._1+x._1, y._2+x._2))
+      .rdd.reduceByKey((x,y) => (x._1+y._1, x._2+y._2))
       .map(each => ((each._1._1,each._1._2), (each._2._1/each._2._2, each._2._2)))
       .map(each => CIPAverageOrderAmount(each._1._1 + each._1._2,
         each._1._1, each._1._2, each._2._1, each._2._2))
-        .coalesce(8).saveToEs("usercip/usercip")
+        .coalesce(8) //foreach println
+      .saveToEs("usercip/usercip")
 
     val usageDS = sparkSession.read.jdbc(propMysql.getProperty("url"),
     "tb_order_cip_record",propMysql)
